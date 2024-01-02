@@ -53,6 +53,7 @@ with Diagram("Observation"):
     im_media - im_api
     im_media - im_webapp
     im_api - im_front
+    im_webapp - im_front
     im_api << prom
     im_webapp << prom
     im_media >> media_indicator_queue >> ob_mic >> prom
