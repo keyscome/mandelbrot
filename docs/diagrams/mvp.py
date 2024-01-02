@@ -22,7 +22,7 @@ with Diagram("Observation"):
         im_front = EC2("Frontend")
         
     with Cluster("DB"):
-        im_db = MySQL("IM-Web")
+        im_db = MySQL("IM")
         ob_db = MySQL("Observation")
     
     media_indicator_queue = Kafka("Media Indicator")
