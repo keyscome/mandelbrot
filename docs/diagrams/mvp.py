@@ -8,34 +8,58 @@ from diagrams.onprem.container import Docker
 
 from diagrams.onprem.queue import Kafka
 
+from diagrams.onprem.network import Nginx
+from diagrams.onprem.client import Users
+
 
 with Diagram("Observation"):
+    
     
     with Cluster("IM"):
         im_api = EC2("API")
         im_media = EC2("Meida")
+        im_webapp = EC2("Webapp")
+        im_front = EC2("Frontend")
+        
+    with Cluster("DB"):
         im_db = MySQL("IM-Web")
+        ob_db = MySQL("Observation")
     
     media_indicator_queue = Kafka("Media Indicator")
     
-    with Cluster("devops"):
+    with Cluster("Observation"):
         prom = Prometheus("Metric TSDB")
-        with Cluster("Observation"):
-            ob_db = MySQL("Observation")
-            ob_api = Docker("API")
+        with Cluster("APP"):
+            ob_statistics_api = Docker("statistics-API")
+            ob_metric_api = Docker("metric-API")
             ob_front = Docker("Frontend")
             ob_mic = Docker("Indicator-Comsumer")
     
+    nginx = Nginx()
+    users = Users("Clients")
+    
+    im_media - im_api
+    im_media - im_webapp
+    im_api - im_front
     im_api << prom
+    im_webapp << prom
     im_media >> media_indicator_queue >> ob_mic >> prom
     
     im_db - im_media
     im_db - im_api
     
-    im_db >> ob_api
-    ob_db - ob_api
-    prom >> ob_api
+    im_db >> ob_statistics_api
+    ob_db - ob_statistics_api
+    prom - ob_statistics_api
     
     im_api - ob_front
-    ob_api - ob_front
+    ob_statistics_api - ob_front
+    
+    nginx << im_webapp
+    nginx << im_front
+    nginx << ob_front
+    
+    users >> ob_metric_api
+    ob_metric_api >> prom
+    nginx >> users
     
