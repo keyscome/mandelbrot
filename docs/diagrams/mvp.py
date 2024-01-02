@@ -11,6 +11,11 @@ from diagrams.onprem.queue import Kafka
 from diagrams.onprem.network import Nginx
 from diagrams.onprem.client import Users
 
+from diagrams.generic.device import Mobile
+from diagrams.generic.device import Tablet
+from diagrams.generic.os import Windows
+from diagrams.generic.os import LinuxGeneral
+
 
 with Diagram("Observation"):
     
@@ -35,8 +40,15 @@ with Diagram("Observation"):
             ob_front = Docker("Frontend")
             ob_mic = Docker("Indicator-Comsumer")
     
-    nginx = Nginx()
-    users = Users("Clients")
+    nginx = Nginx("Nginx")
+    users = Users("Users")
+    with Cluster("Clients"):
+        clients = [
+            Windows("Windows"),
+            LinuxGeneral("Linux"),
+            Mobile("Mobile"),
+            Tablet("Tablet"),
+        ]
     
     im_media - im_api
     im_media - im_webapp
@@ -55,11 +67,12 @@ with Diagram("Observation"):
     im_api - ob_front
     ob_statistics_api - ob_front
     
-    nginx << im_webapp
-    nginx << im_front
-    nginx << ob_front
+    nginx - im_webapp
+    nginx - im_front
+    nginx - ob_front
     
-    users >> ob_metric_api
+    clients >> ob_metric_api
     ob_metric_api >> prom
-    nginx - users
+    nginx - clients
+    clients - users
     
