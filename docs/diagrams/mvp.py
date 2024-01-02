@@ -61,5 +61,5 @@ with Diagram("Observation"):
     
     users >> ob_metric_api
     ob_metric_api >> prom
-    nginx >> users
+    nginx - users
     
