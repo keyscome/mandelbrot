@@ -16,6 +16,11 @@ from diagrams.generic.device import Tablet
 from diagrams.generic.os import Windows
 from diagrams.generic.os import LinuxGeneral
 
+from diagrams.programming.language import Go
+from diagrams.programming.language import Python
+from diagrams.programming.framework import React
+from diagrams.programming.framework import Vue
+
 
 with Diagram("Observation"):
     
@@ -24,7 +29,7 @@ with Diagram("Observation"):
         im_api = EC2("API")
         im_media = EC2("Meida")
         im_webapp = EC2("Webapp")
-        im_front = EC2("Frontend")
+        im_front = Vue("Frontend")
         
     with Cluster("DB"):
         im_db = MySQL("IM")
@@ -35,10 +40,12 @@ with Diagram("Observation"):
     with Cluster("Observation"):
         prom = Prometheus("Metric TSDB")
         with Cluster("APP"):
-            ob_statistics_api = Docker("statistics-API")
-            ob_metric_api = Docker("metric-API")
-            ob_front = Docker("Frontend")
-            ob_mic = Docker("Indicator-Comsumer")
+            ob_front = React("Frontend")
+            ob_metric_api = Go("metric-API")
+            ob_mic = Go("Indicator-Comsumer")
+            with Cluster("statistics"):
+                ob_statistics_job = Python("job")
+                ob_statistics_api = Go("API")
     
     nginx = Nginx("Nginx")
     users = Users("Users")
@@ -61,9 +68,10 @@ with Diagram("Observation"):
     im_db - im_media
     im_db - im_api
     
-    im_db >> ob_statistics_api
-    ob_db - ob_statistics_api
+    im_db >> ob_statistics_job
     prom - ob_statistics_api
+    ob_statistics_job - ob_statistics_api
+    ob_db - ob_statistics_api
     
     im_api - ob_front
     ob_statistics_api - ob_front
